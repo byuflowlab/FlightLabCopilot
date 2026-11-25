@@ -423,16 +423,15 @@ function drawMap() {
     const x = X(p[0]), y = Y(p[1]);
     const rTrue = S.course.radius_h * sc;
     const r = Math.max(rTrue, 9);
-    let fill = onImage ? "rgba(255,255,255,0.85)" : col("--bg");
-    let stroke = col("--muted");
-    if (e.status === "done") { fill = col("--good-bg"); stroke = col("--good"); }
-    if (k === S.active) { fill = col("--warn-bg"); stroke = col("--turn"); }
+    // pending: light blue with white text, readable on satellite imagery too
+    let fill = "#5aa9e6", stroke = "#1f6fae", text = "#fff";
+    if (e.status === "done") { fill = col("--good-bg"); stroke = col("--good"); text = col("--good"); }
+    if (k === S.active) { fill = col("--warn-bg"); stroke = col("--turn"); text = col("--text"); }
     if (e.status === "skipped") stroke = col("--arrow-idle");
     ctx.beginPath(); ctx.arc(x, y, r, 0, 2 * Math.PI);
     ctx.fillStyle = fill; ctx.fill();
     ctx.lineWidth = k === S.active ? 3 : 2; ctx.strokeStyle = stroke; ctx.stroke();
-    if (rTrue < r && rTrue > 1.5) { ctx.beginPath(); ctx.arc(x, y, rTrue, 0, 2 * Math.PI); ctx.lineWidth = 1; ctx.stroke(); }
-    ctx.fillStyle = e.status === "done" ? col("--good") : col("--text");
+    ctx.fillStyle = text;
     ctx.fillText(String(k + 1), x, y + 0.5);
   });
 

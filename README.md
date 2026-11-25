@@ -2,6 +2,8 @@
 
 A local web app that tells a copilot which way the pilot should fly to reach a sequence of GPS waypoints. The aircraft's GPS position comes over the radio pair used in ME 415 (the same setup as [byuflowlab/415gps](https://github.com/byuflowlab/415gps)); a small Python server on your computer reads it and the guidance shows in your browser. It works without internet.
 
+<p align="center"><img src="docs/screenshot.png" alt="FlightLabCopilot at night with satellite imagery: a large orange arrow and LEFT 84° on the left, the map with the course and the waypoint table on the right" width="800"></p>
+
 ## Student and TA download
 
 No Git, Python or terminal commands needed. Download the launcher for [macOS](https://github.com/byuflowlab/FlightLabCopilot/raw/main/student_setup/downloads/FlightLabCopilot-macOS.zip), [Windows](https://github.com/byuflowlab/FlightLabCopilot/raw/main/student_setup/downloads/FlightLabCopilot-Windows.zip), or [Linux](https://github.com/byuflowlab/FlightLabCopilot/raw/main/student_setup/downloads/FlightLabCopilot-Linux.zip), unzip it, read **START HERE**, and double-click the launcher. The first launch needs internet and downloads a private copy of Python and the app, so do it before going to the field; later launches start in seconds, work offline, and update automatically when a new build is promoted. The course, map and recordings are kept across updates. Instructors: see [student_setup/README.md](student_setup/README.md).
@@ -89,7 +91,7 @@ The map on the right is optional. Click **Map** to choose:
 - **Picture**: your own north-up image of the field (a Google Earth screenshot, a drone photo…). Enter the latitude of its top and bottom edges and the longitude of its left and right edges.
 - **Satellite**: imagery downloaded while you have internet and kept for the field. Save the course first; the download covers the boundary and every waypoint. Imagery © Esri and its partners.
 
-The map shows the boundary (solid red) and warning line (dashed), waypoint bubbles (numbered; green when reached, orange when active), the start point **S**, the aircraft and its recent track, and a dashed line to the active waypoint.
+The map shows the boundary (solid red) and warning line (dashed), waypoints (numbered circles: light blue when pending, orange when active, green when reached), the start point **S**, the aircraft and its recent track, and a dashed line to the active waypoint.
 
 ## Where things are saved
 
