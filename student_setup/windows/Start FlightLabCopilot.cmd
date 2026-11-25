@@ -11,7 +11,7 @@ rem start that installed copy directly, so nothing is downloaded or re-resolved
 rem again until the instructor promotes a new build. The course, map,
 rem settings and recordings live in the same folder, outside the environment, so updates keep them.
 
-set "FLIGHTLABCOPILOT_DEFAULT_COMMIT=0000000000000000000000000000000000000000"
+set "FLIGHTLABCOPILOT_DEFAULT_COMMIT=b3043560e4919038bbd428350adbc5b5e415ed95"
 set "FLIGHTLABCOPILOT_RELEASE_URL=https://raw.githubusercontent.com/byuflowlab/FlightLabCopilot/main/student_setup/release.txt"
 set "FLIGHTLABCOPILOT_DATA_ROOT=%LOCALAPPDATA%\FlightLabCopilot"
 set "FLIGHTLABCOPILOT_UV_DIR=%FLIGHTLABCOPILOT_DATA_ROOT%\uv"
