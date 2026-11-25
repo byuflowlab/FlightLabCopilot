@@ -1,0 +1,71 @@
+name: Student launcher smoke tests
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - ".github/workflows/student-launchers.yml"
+      - "student_setup/build_downloads.sh"
+      - "student_setup/macos/**"
+      - "student_setup/windows/**"
+      - "student_setup/linux/**"
+  pull_request:
+    paths:
+      - ".github/workflows/student-launchers.yml"
+      - "student_setup/build_downloads.sh"
+      - "student_setup/macos/**"
+      - "student_setup/windows/**"
+      - "student_setup/linux/**"
+
+permissions:
+  contents: read
+
+jobs:
+  macos:
+    name: macOS launcher
+    runs-on: macos-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+      - name: Run the student launcher twice (install, then reuse)
+        env:
+          FLIGHTLABCOPILOT_TEST_ONLY: "1"
+          XDG_DATA_HOME: ${{ runner.temp }}/flightlabcopilot-student-test
+        run: |
+          ./student_setup/macos/Start\ FlightLabCopilot.command
+          ./student_setup/macos/Start\ FlightLabCopilot.command
+      - name: Build and inspect student downloads
+        run: |
+          ./student_setup/build_downloads.sh
+          unzip -t student_setup/downloads/FlightLabCopilot-macOS.zip
+          unzip -t student_setup/downloads/FlightLabCopilot-Windows.zip
+          unzip -t student_setup/downloads/FlightLabCopilot-Linux.zip
+
+  windows:
+    name: Windows launcher
+    runs-on: windows-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+      - name: Run the student launcher twice (install, then reuse)
+        shell: cmd
+        env:
+          FLIGHTLABCOPILOT_TEST_ONLY: "1"
+          LOCALAPPDATA: ${{ runner.temp }}\flightlabcopilot-student-test
+        run: |
+          call "student_setup\windows\Start FlightLabCopilot.cmd"
+          call "student_setup\windows\Start FlightLabCopilot.cmd"
+
+  linux:
+    name: Linux launcher
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+      - name: Run the student launcher twice (install, then reuse)
+        env:
+          FLIGHTLABCOPILOT_TEST_ONLY: "1"
+          XDG_DATA_HOME: ${{ runner.temp }}/flightlabcopilot-student-test
+        run: |
+          bash "./student_setup/linux/Start FlightLabCopilot.sh"
+          bash "./student_setup/linux/Start FlightLabCopilot.sh"

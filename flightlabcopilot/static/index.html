@@ -1,0 +1,210 @@
+<!doctype html>
+<html lang="en" data-theme="day">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FlightLab Copilot</title>
+<link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<header class="topbar">
+  <div class="brand">FlightLab Copilot</div>
+  <div class="chips">
+    <span class="chip rec hidden" id="chip-rec" title="Fixes and events are being written to a CSV">● REC</span>
+    <span class="chip" id="chip-gps" title="GPS fix, satellites, HDOP and update rate">GPS —</span>
+    <span class="chip" id="chip-source" title="Where GPS data comes from">No source</span>
+    <span class="chip" id="chip-home" title="Altitudes are heights above this start point">Start point —</span>
+    <button class="chip chip-btn" id="chip-sound" title="Browsers only play sound after a click">🔇 Click to enable chime</button>
+  </div>
+  <nav class="actions">
+    <button id="btn-record" class="record-start" title="Start writing every GPS fix and event to a new CSV">● Record</button>
+    <button id="btn-home" title="Average the next 2 s of GPS as the start point (aircraft on the ground, held still)">Set start here</button>
+    <button id="btn-course">Course</button>
+    <button id="btn-source">GPS source</button>
+    <button id="btn-map">Map</button>
+    <button id="btn-theme" title="Day: dark on white, best in sunlight. Night: light on dark.">Night</button>
+    <button id="btn-exit" class="danger">Exit</button>
+  </nav>
+</header>
+
+<div id="banner" class="banner hidden"></div>
+
+<main class="layout" id="layout">
+  <section class="guide" id="guide">
+    <div class="wp-title"><span id="wp-index">—</span><span id="wp-name"></span></div>
+    <div class="dial-row">
+      <svg id="dial" viewBox="-150 -150 300 300" aria-label="Direction to the waypoint">
+        <circle r="140" class="dial-ring"/>
+        <g id="dial-ticks"></g>
+        <text id="dial-north" class="dial-north" y="-118" text-anchor="middle">N</text>
+        <g id="arrow" class="arrow">
+          <path d="M0,-118 L46,-40 L17,-40 L17,95 L-17,95 L-17,-40 L-46,-40 Z"/>
+        </g>
+        <path class="dial-track" d="M0,-150 L-12,-132 L12,-132 Z"/>
+      </svg>
+      <div class="turn-box">
+        <div id="turn-text" class="turn-text">—</div>
+        <div id="turn-sub" class="turn-sub"></div>
+      </div>
+    </div>
+    <div class="tiles">
+      <div class="tile"><div class="tile-label">Distance</div><div class="tile-value" id="t-dist">—</div><div class="tile-sub" id="t-dist-sub"></div></div>
+      <div class="tile" id="tile-alt"><div class="tile-label">Altitude</div><div class="tile-value" id="t-alt">—</div><div class="tile-sub" id="t-alt-sub"></div></div>
+      <div class="tile"><div class="tile-label">Closest so far</div><div class="tile-value" id="t-close">—</div><div class="tile-sub" id="t-close-sub"></div></div>
+    </div>
+    <div class="small-row" id="small-row"></div>
+  </section>
+
+  <section class="side">
+    <div class="map-wrap" id="map-wrap">
+      <canvas id="map"></canvas>
+      <div class="map-attr" id="map-attr"></div>
+    </div>
+    <div class="wp-panel">
+      <div class="wp-panel-head">
+        <h2>Waypoints</h2>
+        <div><span id="bubble-note" class="muted"></span> <button id="btn-restart">Restart run</button></div>
+      </div>
+      <table class="wp-table">
+        <thead><tr><th>#</th><th>Name</th><th>Alt</th><th>Status</th><th>Closest</th><th></th></tr></thead>
+        <tbody id="wp-body"></tbody>
+      </table>
+      <div class="history-head">
+        <h2>History</h2>
+        <span id="history-note" class="muted"></span>
+        <span class="spacer"></span>
+        <button id="btn-download" title="Download every recording (one CSV, or a zip of several)">Download history</button>
+        <button id="btn-clear" title="Delete the recordings and clear the map track and event list">Clear history</button>
+      </div>
+      <div id="event-log" class="event-log"></div>
+    </div>
+  </section>
+</main>
+
+<div id="flash" class="flash hidden"></div>
+
+<!-- Course editor -->
+<dialog id="dlg-course" class="dlg wide">
+  <form method="dialog" id="course-form">
+    <h2>Course</h2>
+    <div class="row">
+      <label>Name <input id="c-name" type="text"></label>
+      <label title="Horizontal radius of the bubble around each waypoint">Bubble radius (m) <input id="c-rh" type="number" step="0.1" min="0.1"></label>
+      <label title="Vertical half-height of the bubble. Equal to the radius makes a sphere. GPS altitude is noisier than position, so a larger value is reasonable.">Bubble half-height (m) <input id="c-rv" type="number" step="0.1" min="0.1"></label>
+    </div>
+    <p class="muted">Latitude and longitude in decimal degrees (west and south negative). Altitude is the height above the start point, in metres.</p>
+    <table class="edit-table">
+      <thead><tr><th>#</th><th>Name</th><th>Latitude</th><th>Longitude</th><th>Alt (m)</th><th></th></tr></thead>
+      <tbody id="c-rows"></tbody>
+    </table>
+    <div class="row">
+      <button type="button" id="c-add">Add waypoint</button>
+      <button type="button" id="c-add-here" title="Add a waypoint at the current GPS position">Add at current position</button>
+      <details class="paste">
+        <summary>Paste many</summary>
+        <p class="muted">One waypoint per line: <code>lat, lon, alt</code> or <code>name, lat, lon, alt</code>. Replaces the table.</p>
+        <textarea id="c-paste" rows="5" placeholder="40.26764, -111.63587, 15"></textarea>
+        <button type="button" id="c-paste-apply">Use these</button>
+      </details>
+    </div>
+    <fieldset>
+      <legend><label><input type="checkbox" id="b-on"> Flying-field boundary (out-of-bounds warning)</label></legend>
+      <div class="row">
+        <label>Centre latitude <input id="b-lat" type="number" step="any"></label>
+        <label>Centre longitude <input id="b-lon" type="number" step="any"></label>
+        <label title="gpslog.py bdy_R[0]">Semi-axis 1 (m) <input id="b-se" type="number" step="any"></label>
+        <label title="gpslog.py bdy_R[1]">Semi-axis 2 (m) <input id="b-sn" type="number" step="any"></label>
+        <label title="gpslog.py bdy_theta, in degrees">Rotation (deg) <input id="b-rot" type="number" step="any"></label>
+        <label title="Warn once the ellipse value passes this (gpslog.py uses 0.7)">Warn at <input id="b-warn" type="number" step="0.05" min="0" max="1"></label>
+      </div>
+    </fieldset>
+    <p id="c-error" class="error"></p>
+    <div class="row end">
+      <a class="button" href="/api/course/export">Export file</a>
+      <label class="button">Import file<input type="file" id="c-import" accept=".json,application/json" hidden></label>
+      <span class="spacer"></span>
+      <button value="cancel" formnovalidate>Cancel</button>
+      <button type="button" id="c-save" class="primary">Save</button>
+    </div>
+  </form>
+</dialog>
+
+<!-- GPS source -->
+<dialog id="dlg-source" class="dlg">
+  <form method="dialog">
+    <h2>GPS source</h2>
+    <fieldset>
+      <legend>Radio</legend>
+      <p class="muted">Plug the ground radio into USB. Likely ports are listed first.</p>
+      <div class="row">
+        <select id="s-port"></select>
+        <button type="button" id="s-refresh">Refresh</button>
+        <label>Baud <input id="s-baud" type="number" value="57600" style="width:7em"></label>
+        <button type="button" id="s-connect" class="primary">Connect</button>
+      </div>
+    </fieldset>
+    <fieldset>
+      <legend>Replay a recorded flight</legend>
+      <p class="muted">A CSV from gpslog.py or from this app's logs. The start point is re-taken from its first fixes.</p>
+      <div class="row">
+        <input type="file" id="r-file" accept=".csv,text/csv">
+        <label>Speed <select id="r-speed"><option>1</option><option>2</option><option>5</option><option>10</option></select>×</label>
+        <button type="button" id="r-start" class="primary">Replay</button>
+      </div>
+    </fieldset>
+    <fieldset>
+      <legend>Simulator</legend>
+      <p class="muted">A simulated aircraft flies the course, with wind and GPS noise. For practice and testing.</p>
+      <button type="button" id="sim-start" class="primary">Start simulator</button>
+    </fieldset>
+    <p id="s-error" class="error"></p>
+    <div class="row end">
+      <button type="button" id="s-stop">Stop source</button>
+      <span class="spacer"></span>
+      <button value="close">Close</button>
+    </div>
+  </form>
+</dialog>
+
+<!-- Map -->
+<dialog id="dlg-map" class="dlg">
+  <form method="dialog">
+    <h2>Map</h2>
+    <div class="row">
+      <label><input type="radio" name="m-kind" value="off"> Hidden</label>
+      <label><input type="radio" name="m-kind" value="blank"> Blank grid</label>
+      <label><input type="radio" name="m-kind" value="image" id="m-kind-image"> Picture</label>
+      <label><input type="radio" name="m-kind" value="tiles" id="m-kind-tiles"> Satellite</label>
+    </div>
+    <fieldset>
+      <legend>Your own picture</legend>
+      <p class="muted">A north-up picture of the field (screenshot from Google Earth, drone photo…). Enter the latitude of its top and bottom edges and the longitude of its left and right edges.</p>
+      <div class="row">
+        <input type="file" id="i-file" accept="image/*">
+      </div>
+      <div class="row">
+        <label>Top lat <input id="i-n" type="number" step="any"></label>
+        <label>Bottom lat <input id="i-s" type="number" step="any"></label>
+        <label>Left lon <input id="i-w" type="number" step="any"></label>
+        <label>Right lon <input id="i-e" type="number" step="any"></label>
+      </div>
+      <button type="button" id="i-upload" class="primary">Use picture</button>
+    </fieldset>
+    <fieldset>
+      <legend>Download satellite imagery</legend>
+      <p class="muted">Needs internet now; kept on this computer for the field. Covers the boundary and all waypoints. Save the course first.</p>
+      <div class="row">
+        <label>Detail <select id="d-zoom"><option value="17">Low (zoom 17)</option><option value="18" selected>Medium (zoom 18)</option><option value="19">High (zoom 19)</option></select></label>
+        <span id="d-estimate" class="muted"></span>
+        <button type="button" id="d-start" class="primary">Download</button>
+      </div>
+      <div id="d-progress" class="muted"></div>
+    </fieldset>
+    <p id="m-error" class="error"></p>
+    <div class="row end"><span class="spacer"></span><button value="close">Close</button></div>
+  </form>
+</dialog>
+
+<script src="/static/app.js"></script>
+</body>
+</html>

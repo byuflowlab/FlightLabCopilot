@@ -1,0 +1,16 @@
+FLIGHTLABCOPILOT FOR WINDOWS
+
+1. Double-click "Start FlightLabCopilot.cmd".
+2. Keep the launcher window open while you use FlightLabCopilot in your browser.
+3. Click Exit in the app, or close the launcher window, when you are finished.
+
+The first launch needs internet access and may take a few minutes. Later
+launches are faster. FlightLabCopilot checks for updates automatically.
+
+If Windows SmartScreen appears, choose More info, check that the file came from
+your course, and choose Run anyway.
+
+The flying field has no internet, so open it once at home or on campus first.
+After that it starts without internet (the update check is skipped).
+
+If setup fails, take a screenshot of the launcher window and send it to your TA.
