@@ -67,7 +67,7 @@ Both `release.txt` and the source archives are fetched anonymously, so **the Git
 
 For a release, first push and test the new code. Then put that tested 40-character commit hash in `student_setup/release.txt` and push that one-file change. Users receive the new build the next time they launch FlightLabCopilot with internet. Commits that have not been placed in `release.txt` are never sent to students.
 
-The **Student launcher smoke tests** GitHub Actions workflow runs the real launcher twice (install, then reuse) on macOS, Windows, and Ubuntu, with `FLIGHTLABCOPILOT_TEST_ONLY=1` so the second run imports the app instead of starting the server. It runs automatically when launcher files change and can also be started manually from the repository's **Actions** tab. Changing only `release.txt` does not rerun it.
+The **Student launcher smoke tests** GitHub Actions workflow runs the real launcher twice (install, then reuse) on macOS, Windows, and Ubuntu, with `FLIGHTLABCOPILOT_TEST_ONLY=1` so the second run imports the app instead of starting the server. It runs only when a build is released, that is, when a push to `main` changes `release.txt`, so it tests the launchers against the build students are about to get. To test launcher changes before releasing, start it by hand from the repository's **Actions** tab (**Run workflow**).
 
 After editing any launcher or `START HERE.txt`, rebuild the ZIP files:
 

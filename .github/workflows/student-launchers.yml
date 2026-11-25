@@ -1,21 +1,13 @@
 name: Student launcher smoke tests
 
+# Runs only when a build is released (release.txt changes on main), or by hand
+# from the Actions tab. Ordinary pushes and pull requests do not run it.
 on:
   workflow_dispatch:
   push:
+    branches: [main]
     paths:
-      - ".github/workflows/student-launchers.yml"
-      - "student_setup/build_downloads.sh"
-      - "student_setup/macos/**"
-      - "student_setup/windows/**"
-      - "student_setup/linux/**"
-  pull_request:
-    paths:
-      - ".github/workflows/student-launchers.yml"
-      - "student_setup/build_downloads.sh"
-      - "student_setup/macos/**"
-      - "student_setup/windows/**"
-      - "student_setup/linux/**"
+      - "student_setup/release.txt"
 
 permissions:
   contents: read

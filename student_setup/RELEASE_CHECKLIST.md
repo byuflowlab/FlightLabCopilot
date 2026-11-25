@@ -17,6 +17,7 @@
 2. Commit and push them to `main`.
 3. Run `git rev-parse HEAD` and copy the full 40-character commit hash.
 4. Replace the hash in `student_setup/release.txt` and push that one-file change.
+   This push starts **Student launcher smoke tests** in the **Actions** tab; check that it passes on all three systems.
 5. Tell users to click **Exit** and reopen FlightLabCopilot **while they have internet**. Their existing launcher checks the release file and installs the promoted build into a fresh environment (under a minute; downloaded libraries are reused). Their course, map and recordings are kept.
 
 Do not promote a build on a flying day: a launcher at the field cannot reach GitHub and keeps the old build, which is fine, but a half-finished update elsewhere is not worth the risk.
